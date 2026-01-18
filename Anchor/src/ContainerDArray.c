@@ -49,6 +49,9 @@ Anchor_Container *Anchor_Container_Create(void)
 
 void Anchor_Container_Destroy(Anchor_Container *container)
 {
+	if (!container)
+		return;
+
 	free(container->Data);
 	free(container);
 }

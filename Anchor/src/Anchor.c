@@ -30,6 +30,9 @@ Anchor_Context *Anchor_Context_Create(void)
 
 void Anchor_Context_Destroy(Anchor_Context *ctx)
 {
+	if (!ctx)
+		return;
+
 	Anchor_Container_Destroy(ctx->Container);
 	free(ctx);
 }
