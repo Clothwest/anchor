@@ -39,7 +39,7 @@ bool Anchor_NewFlag(Anchor_Context *ctx, const char *sFlag, const char *lFlag, c
 	if (!s_IsValid(ctx))
 		return false;
 
-	return Anchor_Container_Add(ctx->Container, sFlag, lFlag, info, true);
+	return Anchor_Container_Add(ctx->Container, sFlag, lFlag, info, Anchor_EntryKind_Flag);
 }
 
 bool Anchor_NewOption(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info)
@@ -47,7 +47,7 @@ bool Anchor_NewOption(Anchor_Context *ctx, const char *sFlag, const char *lFlag,
 	if (!s_IsValid(ctx))
 		return false;
 
-	return Anchor_Container_Add(ctx->Container, sFlag, lFlag, info, false);
+	return Anchor_Container_Add(ctx->Container, sFlag, lFlag, info, Anchor_EntryKind_Option);
 }
 
 int Anchor_Parse(Anchor_Context *ctx, const char **argv, int argc)
@@ -66,7 +66,7 @@ int Anchor_Parse(Anchor_Context *ctx, const char **argv, int argc)
 		if (!Anchor_Container_Has(container, arg))
 			continue;
 
-		if (Anchor_Container_IsBool(container, arg))
+		if (Anchor_Container_GetKind(container, arg) == Anchor_EntryKind_Flag)
 		{
 			Anchor_Container_Set(container, arg, "true");
 			continue;
@@ -80,32 +80,32 @@ int Anchor_Parse(Anchor_Context *ctx, const char **argv, int argc)
 	return 0;
 }
 
-bool Anchor_GetBool(Anchor_Context *ctx, const char *key)
+bool Anchor_IsSet(Anchor_Context *ctx, const char *flag)
 {
 	if (!s_IsValid(ctx))
 		return false;
 
-	return Anchor_Container_Get(ctx->Container, key);
+	return Anchor_Container_Get(ctx->Container, flag);
 }
 
-int Anchor_GetInt(Anchor_Context *ctx, const char *key, int dft)
+int Anchor_GetInt(Anchor_Context *ctx, const char *flag, int dft)
 {
 	if (!s_IsValid(ctx))
 		return dft;
 
-	const char *rawValue = Anchor_Container_Get(ctx->Container, key);
+	const char *rawValue = Anchor_Container_Get(ctx->Container, flag);
 	if (!rawValue)
 		return dft;
 
 	return atoi(rawValue);
 }
 
-const char *Anchor_GetStr(Anchor_Context *ctx, const char *key, const char *dft)
+const char *Anchor_GetStr(Anchor_Context *ctx, const char *flag, const char *dft)
 {
 	if (!s_IsValid(ctx))
 		return dft;
 
-	const char *rawValue = Anchor_Container_Get(ctx->Container, key);
+	const char *rawValue = Anchor_Container_Get(ctx->Container, flag);
 	if (!rawValue)
 		return dft;
 

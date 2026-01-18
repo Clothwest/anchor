@@ -6,7 +6,7 @@ static void PrintVersion(void);
 static void PrintInt(int num);
 static void PrintString(const char *str);
 
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
 	Anchor_Context *context = Anchor_Context_Create();
 
@@ -16,16 +16,20 @@ int main(int argc, char ** argv)
 
 	Anchor_Parse(context, argv, argc);
 
-	if (Anchor_GetBool(context, "-v"))
+	if (Anchor_IsSet(context, "-v"))
 		PrintVersion();
 
-	int outInt = Anchor_GetInt(context, "-i", 0);
-	if (outInt != 0)
+	if (Anchor_IsSet(context, "-i"))
+	{
+		int outInt = Anchor_GetInt(context, "-i", 0);
 		PrintInt(outInt);
+	}
 
 	const char *outStr = Anchor_GetStr(context, "-s", NULL);
 	if (outStr)
 		PrintString(outStr);
+
+	Anchor_Context_Destroy(context);
 }
 
 void PrintVersion(void)

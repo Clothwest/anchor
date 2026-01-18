@@ -14,6 +14,7 @@ ANCHOR_API bool Anchor_NewOption(Anchor_Context *ctx, const char *sFlag, const c
 
 ANCHOR_API int Anchor_Parse(Anchor_Context *ctx, const char **argv, int argc);
 
-ANCHOR_API bool Anchor_GetBool(Anchor_Context *ctx, const char *key);
-ANCHOR_API int Anchor_GetInt(Anchor_Context *ctx, const char *key, int dft);
-ANCHOR_API const char *Anchor_GetStr(Anchor_Context *ctx, const char *key, const char *dft);
+ANCHOR_API bool Anchor_IsSet(Anchor_Context *ctx, const char *flag);
+
+ANCHOR_API int Anchor_GetInt(Anchor_Context *ctx, const char *flag, int dft);
+ANCHOR_API const char *Anchor_GetStr(Anchor_Context *ctx, const char *flag, const char *dft);
