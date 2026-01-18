@@ -1,6 +1,5 @@
 #include "EntryContainer.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -16,7 +15,6 @@ typedef struct Anchor_Entry
 	const char *RawValue;
 } Anchor_Entry;
 
-
 typedef struct Anchor_EntryContainer
 {
 	Anchor_Entry *Data;
@@ -26,7 +24,7 @@ typedef struct Anchor_EntryContainer
 } Anchor_EntryContainer;
 
 static int s_GrowIfNeeded(Anchor_EntryContainer *container);
-static Anchor_Entry *s_FindItem(Anchor_EntryContainer *container, const char *key);
+static Anchor_Entry *s_FindEntry(Anchor_EntryContainer *container, const char *key);
 
 Anchor_EntryContainer *Anchor_EntryContainer_Create(void)
 {
@@ -49,9 +47,6 @@ Anchor_EntryContainer *Anchor_EntryContainer_Create(void)
 
 void Anchor_EntryContainer_Destroy(Anchor_EntryContainer *container)
 {
-	if (!container)
-		return;
-
 	free(container->Data);
 	free(container);
 }
@@ -62,49 +57,49 @@ bool Anchor_EntryContainer_Add(Anchor_EntryContainer *container, const char *sFl
 	if (grownCapacity == -1)
 		return false;
 
-	Anchor_Entry *newItem = container->Data + container->Size++;
+	Anchor_Entry *newEntry = container->Data + container->Size++;
 
-	newItem->ShortFlag = sFlag;
-	newItem->LongFlag = lFlag;
-	newItem->Information = info;
+	newEntry->ShortFlag = sFlag;
+	newEntry->LongFlag = lFlag;
+	newEntry->Information = info;
 
-	newItem->Kind = kind;
-	newItem->RawValue = NULL;
+	newEntry->Kind = kind;
+	newEntry->RawValue = NULL;
 
 	return true;
 }
 
 bool Anchor_EntryContainer_Has(Anchor_EntryContainer *container, const char *key)
 {
-	return s_FindItem(container, key);
+	return s_FindEntry(container, key);
 }
 
 Anchor_EntryKind Anchor_EntryContainer_GetKind(Anchor_EntryContainer *container, const char *key)
 {
-	Anchor_Entry *item = s_FindItem(container, key);
-	if (!item)
+	Anchor_Entry *entry = s_FindEntry(container, key);
+	if (!entry)
 		return Anchor_EntryKind_None;
 
-	return item->Kind;
+	return entry->Kind;
 }
 
 bool Anchor_EntryContainer_Set(Anchor_EntryContainer *container, const char *key, const char *value)
 {
-	Anchor_Entry *item = s_FindItem(container, key);
-	if (!item)
+	Anchor_Entry *entry = s_FindEntry(container, key);
+	if (!entry)
 		return false;
 
-	item->RawValue = value;
+	entry->RawValue = value;
 	return true;
 }
 
 const char *Anchor_EntryContainer_Get(Anchor_EntryContainer *container, const char *key)
 {
-	Anchor_Entry *item = s_FindItem(container, key);
-	if (!item)
+	Anchor_Entry *entry = s_FindEntry(container, key);
+	if (!entry)
 		return NULL;
 
-	return item->RawValue;
+	return entry->RawValue;
 }
 
 int s_GrowIfNeeded(Anchor_EntryContainer *container)
@@ -123,15 +118,15 @@ int s_GrowIfNeeded(Anchor_EntryContainer *container)
 	return (int)(newCapacity - oldCapacity);
 }
 
-Anchor_Entry *s_FindItem(Anchor_EntryContainer *container, const char *key)
+Anchor_Entry *s_FindEntry(Anchor_EntryContainer *container, const char *key)
 {
 	for (int i = 0; i < container->Size; i++)
 	{
-		Anchor_Entry *item = container->Data + i;
+		Anchor_Entry *entry = container->Data + i;
 
-		if ((item->ShortFlag) && (strcmp(key, item->ShortFlag) == 0) || (item->LongFlag) && (strcmp(key, item->LongFlag) == 0))
+		if ((entry->ShortFlag) && (strcmp(key, entry->ShortFlag) == 0) || (entry->LongFlag) && (strcmp(key, entry->LongFlag) == 0))
 		{
-			return item;
+			return entry;
 		}
 	}
 

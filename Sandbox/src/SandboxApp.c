@@ -11,6 +11,8 @@ int main(int argc, char **argv)
 	Anchor_Context *context = Anchor_Context_Create();
 
 	Anchor_NewFlag(context, "-v", "--version", "Show version");
+	Anchor_NewFlag(context, NULL, "--show", "Show PosArg");
+
 	Anchor_NewOption(context, "-i", "--int", "Print int");
 	Anchor_NewOption(context, "-s", "--str", "Print String");
 
@@ -28,6 +30,15 @@ int main(int argc, char **argv)
 	const char *outStr = Anchor_GetStr(context, "-s", NULL);
 	if (outStr)
 		PrintString(outStr);
+
+	size_t posArgCount = Anchor_GetPosArgCount(context);
+	if (Anchor_IsSet(context, "--show"))
+	{
+		printf("Count: %zu\n", posArgCount);
+
+		for (size_t i = 0; i < posArgCount; i++)
+			printf("%zu: %s\n", i, Anchor_GetPosArgAt(context, i));
+	}
 
 	Anchor_Context_Destroy(context);
 }

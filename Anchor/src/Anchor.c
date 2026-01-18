@@ -1,13 +1,14 @@
 #include "Anchor/Anchor.h"
 
 #include "EntryContainer.h"
+#include "PosArgContainer.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 
 typedef struct Anchor_Context
 {
 	Anchor_EntryContainer *EntryContainer;
+	Anchor_PosArgContainer *PosArgContainer;
 } Anchor_Context;
 
 static bool s_IsValid(Anchor_Context *ctx);
@@ -19,9 +20,14 @@ Anchor_Context *Anchor_Context_Create(void)
 		return NULL;
 
 	context->EntryContainer = Anchor_EntryContainer_Create();
-	if (!context->EntryContainer)
+	context->PosArgContainer = Anchor_PosArgContainer_Create();
+	if (!context->EntryContainer || !context->PosArgContainer)
 	{
+		free(context->EntryContainer);
+		free(context->PosArgContainer);
+
 		free(context);
+
 		return NULL;
 	}
 
@@ -33,7 +39,11 @@ void Anchor_Context_Destroy(Anchor_Context *ctx)
 	if (!ctx)
 		return;
 
-	Anchor_EntryContainer_Destroy(ctx->EntryContainer);
+	if (ctx->EntryContainer)
+		Anchor_EntryContainer_Destroy(ctx->EntryContainer);
+	if (ctx->PosArgContainer)
+		Anchor_PosArgContainer_Destroy(ctx->PosArgContainer);
+	
 	free(ctx);
 }
 
@@ -58,26 +68,31 @@ int Anchor_Parse(Anchor_Context *ctx, const char **argv, int argc)
 	if (!s_IsValid(ctx))
 		return -1;
 
-	Anchor_EntryContainer *container = ctx->EntryContainer;
+	Anchor_EntryContainer *entryContainer = ctx->EntryContainer;
+	Anchor_PosArgContainer *posArgContainer = ctx->PosArgContainer;
 	for (int i = 1; i < argc; i++)
 	{
 		const char *arg = argv[i];
 
-		if (arg[0] != '-')
-			continue;
-
-		if (!Anchor_EntryContainer_Has(container, arg))
-			continue;
-
-		if (Anchor_EntryContainer_GetKind(container, arg) == Anchor_EntryKind_Flag)
+		if (arg[0] == '-')
 		{
-			Anchor_EntryContainer_Set(container, arg, "true");
-			continue;
-		}
+			if (!Anchor_EntryContainer_Has(entryContainer, arg))
+				continue;
 
-		if (i + 1 == argc)
+			if (Anchor_EntryContainer_GetKind(entryContainer, arg) == Anchor_EntryKind_Flag)
+			{
+				Anchor_EntryContainer_Set(entryContainer, arg, "true");
+				continue;
+			}
+
+			if (i + 1 == argc)
+				return -1;
+			Anchor_EntryContainer_Set(entryContainer, arg, argv[++i]);
+		}
+		else if (!Anchor_PosArgContainer_Add(posArgContainer, arg))
+		{
 			return -1;
-		Anchor_EntryContainer_Set(container, arg, argv[++i]);
+		}
 	}
 
 	return 0;
@@ -115,7 +130,26 @@ const char *Anchor_GetStr(Anchor_Context *ctx, const char *flag, const char *dft
 	return rawValue;
 }
 
+size_t Anchor_GetPosArgCount(Anchor_Context *ctx)
+{
+	if (!s_IsValid(ctx))
+		return 0;
+
+	return Anchor_PosArgContainer_GetCount(ctx->PosArgContainer);
+}
+
+const char *Anchor_GetPosArgAt(Anchor_Context *ctx, size_t index)
+{
+	if (!s_IsValid(ctx))
+		return NULL;
+
+	if (index >= Anchor_PosArgContainer_GetCount(ctx->PosArgContainer))
+		return NULL;
+
+	return Anchor_PosArgContainer_GetAt(ctx->PosArgContainer, index);
+}
+
 bool s_IsValid(Anchor_Context *ctx)
 {
-	return ctx && ctx->EntryContainer;
+	return ctx && ctx->EntryContainer && ctx->PosArgContainer;
 }
