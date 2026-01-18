@@ -1,4 +1,4 @@
-#include "Container.h"
+#include "EntryContainer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,20 +17,20 @@ typedef struct Anchor_Entry
 } Anchor_Entry;
 
 
-typedef struct Anchor_Container
+typedef struct Anchor_EntryContainer
 {
 	Anchor_Entry *Data;
 
 	size_t Size;
 	size_t Capacity;
-} Anchor_Container;
+} Anchor_EntryContainer;
 
-static int s_GrowIfNeeded(Anchor_Container *container);
-static Anchor_Entry *s_FindItem(Anchor_Container *container, const char *key);
+static int s_GrowIfNeeded(Anchor_EntryContainer *container);
+static Anchor_Entry *s_FindItem(Anchor_EntryContainer *container, const char *key);
 
-Anchor_Container *Anchor_Container_Create(void)
+Anchor_EntryContainer *Anchor_EntryContainer_Create(void)
 {
-	Anchor_Container *container = (Anchor_Container *)malloc(sizeof(Anchor_Container));
+	Anchor_EntryContainer *container = (Anchor_EntryContainer *)malloc(sizeof(Anchor_EntryContainer));
 	if (!container)
 		return NULL;
 
@@ -47,7 +47,7 @@ Anchor_Container *Anchor_Container_Create(void)
 	return container;
 }
 
-void Anchor_Container_Destroy(Anchor_Container *container)
+void Anchor_EntryContainer_Destroy(Anchor_EntryContainer *container)
 {
 	if (!container)
 		return;
@@ -56,7 +56,7 @@ void Anchor_Container_Destroy(Anchor_Container *container)
 	free(container);
 }
 
-bool Anchor_Container_Add(Anchor_Container *container, const char *sFlag, const char *lFlag, const char *info, Anchor_EntryKind kind)
+bool Anchor_EntryContainer_Add(Anchor_EntryContainer *container, const char *sFlag, const char *lFlag, const char *info, Anchor_EntryKind kind)
 {
 	size_t grownCapacity = s_GrowIfNeeded(container);
 	if (grownCapacity == -1)
@@ -74,12 +74,12 @@ bool Anchor_Container_Add(Anchor_Container *container, const char *sFlag, const 
 	return true;
 }
 
-bool Anchor_Container_Has(Anchor_Container *container, const char *key)
+bool Anchor_EntryContainer_Has(Anchor_EntryContainer *container, const char *key)
 {
 	return s_FindItem(container, key);
 }
 
-Anchor_EntryKind Anchor_Container_GetKind(Anchor_Container *container, const char *key)
+Anchor_EntryKind Anchor_EntryContainer_GetKind(Anchor_EntryContainer *container, const char *key)
 {
 	Anchor_Entry *item = s_FindItem(container, key);
 	if (!item)
@@ -88,7 +88,7 @@ Anchor_EntryKind Anchor_Container_GetKind(Anchor_Container *container, const cha
 	return item->Kind;
 }
 
-bool Anchor_Container_Set(Anchor_Container *container, const char *key, const char *value)
+bool Anchor_EntryContainer_Set(Anchor_EntryContainer *container, const char *key, const char *value)
 {
 	Anchor_Entry *item = s_FindItem(container, key);
 	if (!item)
@@ -98,7 +98,7 @@ bool Anchor_Container_Set(Anchor_Container *container, const char *key, const ch
 	return true;
 }
 
-const char *Anchor_Container_Get(Anchor_Container *container, const char *key)
+const char *Anchor_EntryContainer_Get(Anchor_EntryContainer *container, const char *key)
 {
 	Anchor_Entry *item = s_FindItem(container, key);
 	if (!item)
@@ -107,7 +107,7 @@ const char *Anchor_Container_Get(Anchor_Container *container, const char *key)
 	return item->RawValue;
 }
 
-int s_GrowIfNeeded(Anchor_Container *container)
+int s_GrowIfNeeded(Anchor_EntryContainer *container)
 {
 	size_t oldCapacity = container->Capacity;
 
@@ -123,7 +123,7 @@ int s_GrowIfNeeded(Anchor_Container *container)
 	return (int)(newCapacity - oldCapacity);
 }
 
-Anchor_Entry *s_FindItem(Anchor_Container *container, const char *key)
+Anchor_Entry *s_FindItem(Anchor_EntryContainer *container, const char *key)
 {
 	for (int i = 0; i < container->Size; i++)
 	{

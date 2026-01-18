@@ -1,13 +1,13 @@
 #include "Anchor/Anchor.h"
 
-#include "Container.h"
+#include "EntryContainer.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 
 typedef struct Anchor_Context
 {
-	Anchor_Container *Container;
+	Anchor_EntryContainer *EntryContainer;
 } Anchor_Context;
 
 static bool s_IsValid(Anchor_Context *ctx);
@@ -18,8 +18,8 @@ Anchor_Context *Anchor_Context_Create(void)
 	if (!context)
 		return NULL;
 
-	context->Container = Anchor_Container_Create();
-	if (!context->Container)
+	context->EntryContainer = Anchor_EntryContainer_Create();
+	if (!context->EntryContainer)
 	{
 		free(context);
 		return NULL;
@@ -33,7 +33,7 @@ void Anchor_Context_Destroy(Anchor_Context *ctx)
 	if (!ctx)
 		return;
 
-	Anchor_Container_Destroy(ctx->Container);
+	Anchor_EntryContainer_Destroy(ctx->EntryContainer);
 	free(ctx);
 }
 
@@ -42,7 +42,7 @@ bool Anchor_NewFlag(Anchor_Context *ctx, const char *sFlag, const char *lFlag, c
 	if (!s_IsValid(ctx))
 		return false;
 
-	return Anchor_Container_Add(ctx->Container, sFlag, lFlag, info, Anchor_EntryKind_Flag);
+	return Anchor_EntryContainer_Add(ctx->EntryContainer, sFlag, lFlag, info, Anchor_EntryKind_Flag);
 }
 
 bool Anchor_NewOption(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info)
@@ -50,7 +50,7 @@ bool Anchor_NewOption(Anchor_Context *ctx, const char *sFlag, const char *lFlag,
 	if (!s_IsValid(ctx))
 		return false;
 
-	return Anchor_Container_Add(ctx->Container, sFlag, lFlag, info, Anchor_EntryKind_Option);
+	return Anchor_EntryContainer_Add(ctx->EntryContainer, sFlag, lFlag, info, Anchor_EntryKind_Option);
 }
 
 int Anchor_Parse(Anchor_Context *ctx, const char **argv, int argc)
@@ -58,7 +58,7 @@ int Anchor_Parse(Anchor_Context *ctx, const char **argv, int argc)
 	if (!s_IsValid(ctx))
 		return -1;
 
-	Anchor_Container *container = ctx->Container;
+	Anchor_EntryContainer *container = ctx->EntryContainer;
 	for (int i = 1; i < argc; i++)
 	{
 		const char *arg = argv[i];
@@ -66,18 +66,18 @@ int Anchor_Parse(Anchor_Context *ctx, const char **argv, int argc)
 		if (arg[0] != '-')
 			continue;
 
-		if (!Anchor_Container_Has(container, arg))
+		if (!Anchor_EntryContainer_Has(container, arg))
 			continue;
 
-		if (Anchor_Container_GetKind(container, arg) == Anchor_EntryKind_Flag)
+		if (Anchor_EntryContainer_GetKind(container, arg) == Anchor_EntryKind_Flag)
 		{
-			Anchor_Container_Set(container, arg, "true");
+			Anchor_EntryContainer_Set(container, arg, "true");
 			continue;
 		}
 
 		if (i + 1 == argc)
 			return -1;
-		Anchor_Container_Set(container, arg, argv[++i]);
+		Anchor_EntryContainer_Set(container, arg, argv[++i]);
 	}
 
 	return 0;
@@ -88,7 +88,7 @@ bool Anchor_IsSet(Anchor_Context *ctx, const char *flag)
 	if (!s_IsValid(ctx))
 		return false;
 
-	return Anchor_Container_Get(ctx->Container, flag);
+	return Anchor_EntryContainer_Get(ctx->EntryContainer, flag);
 }
 
 int Anchor_GetInt(Anchor_Context *ctx, const char *flag, int dft)
@@ -96,7 +96,7 @@ int Anchor_GetInt(Anchor_Context *ctx, const char *flag, int dft)
 	if (!s_IsValid(ctx))
 		return dft;
 
-	const char *rawValue = Anchor_Container_Get(ctx->Container, flag);
+	const char *rawValue = Anchor_EntryContainer_Get(ctx->EntryContainer, flag);
 	if (!rawValue)
 		return dft;
 
@@ -108,7 +108,7 @@ const char *Anchor_GetStr(Anchor_Context *ctx, const char *flag, const char *dft
 	if (!s_IsValid(ctx))
 		return dft;
 
-	const char *rawValue = Anchor_Container_Get(ctx->Container, flag);
+	const char *rawValue = Anchor_EntryContainer_Get(ctx->EntryContainer, flag);
 	if (!rawValue)
 		return dft;
 
@@ -117,5 +117,5 @@ const char *Anchor_GetStr(Anchor_Context *ctx, const char *flag, const char *dft
 
 bool s_IsValid(Anchor_Context *ctx)
 {
-	return ctx && ctx->Container;
+	return ctx && ctx->EntryContainer;
 }
