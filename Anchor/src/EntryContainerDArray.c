@@ -3,15 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INIT_CAP 8
+#define INIT_CAP 16
 
 typedef struct Anchor_Entry
 {
-	const char *ShortFlag;
-	const char *LongFlag;
-	const char *Information;
-
-	Anchor_EntryKind Kind;
+	Anchor_EntryView View;
 
 	bool IsSet;
 	const char *RawValue;
@@ -26,7 +22,7 @@ typedef struct Anchor_EntryContainer
 } Anchor_EntryContainer;
 
 static int s_GrowIfNeeded(Anchor_EntryContainer *container);
-static Anchor_Entry *s_FindEntry(Anchor_EntryContainer *container, const char *key);
+static Anchor_Entry *s_FindEntry(Anchor_EntryContainer *container, const char *flag);
 
 Anchor_EntryContainer *Anchor_EntryContainer_Create(void)
 {
@@ -61,11 +57,11 @@ bool Anchor_EntryContainer_Add(Anchor_EntryContainer *container, const char *sFl
 
 	Anchor_Entry *newEntry = container->Data + container->Size++;
 
-	newEntry->ShortFlag = sFlag;
-	newEntry->LongFlag = lFlag;
-	newEntry->Information = info;
+	newEntry->View.ShortFlag = sFlag;
+	newEntry->View.LongFlag = lFlag;
+	newEntry->View.Information = info;
 
-	newEntry->Kind = kind;
+	newEntry->View.Kind = kind;
 
 	newEntry->IsSet = false;
 	newEntry->RawValue = NULL;
@@ -73,23 +69,42 @@ bool Anchor_EntryContainer_Add(Anchor_EntryContainer *container, const char *sFl
 	return true;
 }
 
-bool Anchor_EntryContainer_Has(Anchor_EntryContainer *container, const char *key)
+bool Anchor_EntryContainer_Has(Anchor_EntryContainer *container, const char *flag)
 {
-	return s_FindEntry(container, key);
+	return s_FindEntry(container, flag);
 }
 
-Anchor_EntryKind Anchor_EntryContainer_GetKind(Anchor_EntryContainer *container, const char *key)
+size_t Anchor_EntryContainer_GetViewCount(Anchor_EntryContainer *container)
 {
-	Anchor_Entry *entry = s_FindEntry(container, key);
+	return container->Size;
+}
+
+const Anchor_EntryView *Anchor_EntryContainer_GetViewAt(Anchor_EntryContainer *container, size_t index)
+{
+	return &(container->Data + index)->View;
+}
+
+const Anchor_EntryView *Anchor_EntryContainer_GetView(Anchor_EntryContainer *container, const char *flag)
+{
+	Anchor_Entry *entry = s_FindEntry(container, flag);
 	if (!entry)
-		return Anchor_EntryKind_None;
+		return NULL;
 
-	return entry->Kind;
+	return &entry->View;
 }
 
-bool Anchor_EntryContainer_Set(Anchor_EntryContainer *container, const char *key, const char *value)
+bool Anchor_EntryContainer_IsSet(Anchor_EntryContainer *container, const char *flag)
 {
-	Anchor_Entry *entry = s_FindEntry(container, key);
+	Anchor_Entry *entry = s_FindEntry(container, flag);
+	if (!entry)
+		return false;
+
+	return entry->IsSet;
+}
+
+bool Anchor_EntryContainer_SetValue(Anchor_EntryContainer *container, const char *flag, const char *value)
+{
+	Anchor_Entry *entry = s_FindEntry(container, flag);
 	if (!entry)
 		return false;
 
@@ -99,18 +114,9 @@ bool Anchor_EntryContainer_Set(Anchor_EntryContainer *container, const char *key
 	return true;
 }
 
-ANCHOR_API bool Anchor_EntryContainer_IsSet(Anchor_EntryContainer *container, const char *key)
+const char *Anchor_EntryContainer_GetValue(Anchor_EntryContainer *container, const char *flag)
 {
-	Anchor_Entry *entry = s_FindEntry(container, key);
-	if (!entry)
-		return false;
-
-	return entry->IsSet;
-}
-
-const char *Anchor_EntryContainer_GetValue(Anchor_EntryContainer *container, const char *key)
-{
-	Anchor_Entry *entry = s_FindEntry(container, key);
+	Anchor_Entry *entry = s_FindEntry(container, flag);
 	if (!entry)
 		return NULL;
 
@@ -133,13 +139,14 @@ int s_GrowIfNeeded(Anchor_EntryContainer *container)
 	return (int)(newCapacity - oldCapacity);
 }
 
-Anchor_Entry *s_FindEntry(Anchor_EntryContainer *container, const char *key)
+Anchor_Entry *s_FindEntry(Anchor_EntryContainer *container, const char *flag)
 {
 	for (int i = 0; i < container->Size; i++)
 	{
 		Anchor_Entry *entry = container->Data + i;
+		Anchor_EntryView *view = &entry->View;
 
-		if ((entry->ShortFlag) && (strcmp(key, entry->ShortFlag) == 0) || (entry->LongFlag) && (strcmp(key, entry->LongFlag) == 0))
+		if ((view->ShortFlag) && (strcmp(flag, view->ShortFlag) == 0) || (view->LongFlag) && (strcmp(flag, view->LongFlag) == 0))
 		{
 			return entry;
 		}

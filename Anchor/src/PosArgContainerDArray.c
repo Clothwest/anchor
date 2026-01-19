@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#define INIT_CAP 8
+#define INIT_CAP 4
 
 typedef struct Anchor_PosArg
 {
