@@ -47,12 +47,12 @@ void Anchor_Context_Destroy(Anchor_Context *ctx)
 	free(ctx);
 }
 
-bool Anchor_NewFlag(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info)
+bool Anchor_NewSwitch(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info)
 {
 	if (!s_IsValid(ctx))
 		return false;
 
-	return Anchor_EntryContainer_Add(ctx->EntryContainer, sFlag, lFlag, info, Anchor_EntryKind_Flag);
+	return Anchor_EntryContainer_Add(ctx->EntryContainer, sFlag, lFlag, info, Anchor_EntryKind_Switch);
 }
 
 bool Anchor_NewOption(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info)
@@ -79,9 +79,9 @@ int Anchor_Parse(Anchor_Context *ctx, const char **argv, int argc)
 			if (!Anchor_EntryContainer_Has(entryContainer, arg))
 				continue;
 
-			if (Anchor_EntryContainer_GetKind(entryContainer, arg) == Anchor_EntryKind_Flag)
+			if (Anchor_EntryContainer_GetKind(entryContainer, arg) == Anchor_EntryKind_Switch)
 			{
-				Anchor_EntryContainer_Set(entryContainer, arg, "true");
+				Anchor_EntryContainer_Set(entryContainer, arg, NULL);
 				continue;
 			}
 
@@ -103,27 +103,15 @@ bool Anchor_IsSet(Anchor_Context *ctx, const char *flag)
 	if (!s_IsValid(ctx))
 		return false;
 
-	return Anchor_EntryContainer_Get(ctx->EntryContainer, flag);
+	return Anchor_EntryContainer_IsSet(ctx->EntryContainer, flag);
 }
 
-int Anchor_GetInt(Anchor_Context *ctx, const char *flag, int dft)
+const char *Anchor_GetValue(Anchor_Context *ctx, const char *flag, const char *dft)
 {
 	if (!s_IsValid(ctx))
 		return dft;
 
-	const char *rawValue = Anchor_EntryContainer_Get(ctx->EntryContainer, flag);
-	if (!rawValue)
-		return dft;
-
-	return atoi(rawValue);
-}
-
-const char *Anchor_GetStr(Anchor_Context *ctx, const char *flag, const char *dft)
-{
-	if (!s_IsValid(ctx))
-		return dft;
-
-	const char *rawValue = Anchor_EntryContainer_Get(ctx->EntryContainer, flag);
+	const char *rawValue = Anchor_EntryContainer_GetValue(ctx->EntryContainer, flag);
 	if (!rawValue)
 		return dft;
 

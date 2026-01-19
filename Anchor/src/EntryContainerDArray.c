@@ -12,6 +12,8 @@ typedef struct Anchor_Entry
 	const char *Information;
 
 	Anchor_EntryKind Kind;
+
+	bool IsSet;
 	const char *RawValue;
 } Anchor_Entry;
 
@@ -64,6 +66,8 @@ bool Anchor_EntryContainer_Add(Anchor_EntryContainer *container, const char *sFl
 	newEntry->Information = info;
 
 	newEntry->Kind = kind;
+
+	newEntry->IsSet = false;
 	newEntry->RawValue = NULL;
 
 	return true;
@@ -89,11 +93,22 @@ bool Anchor_EntryContainer_Set(Anchor_EntryContainer *container, const char *key
 	if (!entry)
 		return false;
 
+	entry->IsSet = true;
 	entry->RawValue = value;
+	
 	return true;
 }
 
-const char *Anchor_EntryContainer_Get(Anchor_EntryContainer *container, const char *key)
+ANCHOR_API bool Anchor_EntryContainer_IsSet(Anchor_EntryContainer *container, const char *key)
+{
+	Anchor_Entry *entry = s_FindEntry(container, key);
+	if (!entry)
+		return false;
+
+	return entry->IsSet;
+}
+
+const char *Anchor_EntryContainer_GetValue(Anchor_EntryContainer *container, const char *key)
 {
 	Anchor_Entry *entry = s_FindEntry(container, key);
 	if (!entry)

@@ -9,7 +9,7 @@ typedef struct Anchor_EntryContainer Anchor_EntryContainer;
 typedef enum Anchor_EntryKind
 {
 	Anchor_EntryKind_None = 0,
-	Anchor_EntryKind_Flag,
+	Anchor_EntryKind_Switch,
 	Anchor_EntryKind_Option
 } Anchor_EntryKind;
 
@@ -22,4 +22,5 @@ ANCHOR_API bool Anchor_EntryContainer_Has(Anchor_EntryContainer *container, cons
 ANCHOR_API Anchor_EntryKind Anchor_EntryContainer_GetKind(Anchor_EntryContainer *container, const char *key);
 
 ANCHOR_API bool Anchor_EntryContainer_Set(Anchor_EntryContainer *container, const char *key, const char *value);
-ANCHOR_API const char *Anchor_EntryContainer_Get(Anchor_EntryContainer *container, const char *key);
+ANCHOR_API bool Anchor_EntryContainer_IsSet(Anchor_EntryContainer *container, const char *key);
+ANCHOR_API const char *Anchor_EntryContainer_GetValue(Anchor_EntryContainer *container, const char *key);

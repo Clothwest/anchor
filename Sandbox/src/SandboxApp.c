@@ -1,6 +1,7 @@
 #include "Anchor/Anchor.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 static void PrintVersion(void);
 static void PrintInt(int num);
@@ -10,8 +11,8 @@ int main(int argc, char **argv)
 {
 	Anchor_Context *context = Anchor_Context_Create();
 
-	Anchor_NewFlag(context, "-v", "--version", "Show version");
-	Anchor_NewFlag(context, NULL, "--show", "Show PosArg");
+	Anchor_NewSwitch(context, "-v", "--version", "Show version");
+	Anchor_NewSwitch(context, NULL, "--show", "Show PosArg");
 
 	Anchor_NewOption(context, "-i", "--int", "Print int");
 	Anchor_NewOption(context, "-s", "--str", "Print String");
@@ -19,15 +20,18 @@ int main(int argc, char **argv)
 	Anchor_Parse(context, argv, argc);
 
 	if (Anchor_IsSet(context, "-v"))
+	{
 		PrintVersion();
+		PrintString(Anchor_GetValue(context, "-v", NULL));
+	}
 
 	if (Anchor_IsSet(context, "-i"))
 	{
-		int outInt = Anchor_GetInt(context, "-i", 0);
+		int outInt = atoi(Anchor_GetValue(context, "-i", 0));
 		PrintInt(outInt);
 	}
 
-	const char *outStr = Anchor_GetStr(context, "-s", NULL);
+	const char *outStr = Anchor_GetValue(context, "-s", NULL);
 	if (outStr)
 		PrintString(outStr);
 
