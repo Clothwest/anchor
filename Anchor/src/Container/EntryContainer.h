@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Anchor/Config.h"
+#include "Anchor/Detail/Config.h"
 
-#include "Anchor/Types.h"
+#include "Anchor/Detail/Types.h"
 
 #include <stdbool.h>
 #include <stddef.h>

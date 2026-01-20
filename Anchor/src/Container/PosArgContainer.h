@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Anchor/Config.h"
+#include "Anchor/Detail/Config.h"
 
 #include <stdbool.h>
 #include <stddef.h>

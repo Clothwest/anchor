@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Config.h"
+#include "Detail/Config.h"
 
-#include "Types.h"
+#include "Detail/Types.h"
 
 #include <stdbool.h>
 #include <stddef.h>
