@@ -136,6 +136,7 @@ int s_GrowIfNeeded(Anchor_EntryContainer *container)
 		return -1;
 
 	container->Data = newData;
+	container->Capacity = newCapacity;
 	return (int)(newCapacity - oldCapacity);
 }
 
