@@ -4,14 +4,17 @@
 
 #include "Detail/Types.h"
 
+#ifndef __cplusplus
 #include <stdbool.h>
+#endif
+
 #include <stddef.h>
 #include <stdio.h>
 
 typedef struct Anchor_Context Anchor_Context;
 
-ANCHOR_API Anchor_Context *Anchor_Context_Create(void);
-ANCHOR_API void Anchor_Context_Destroy(Anchor_Context *ctx);
+ANCHOR_API Anchor_Context *Anchor_CreateContext(void);
+ANCHOR_API void Anchor_DestroyContext(Anchor_Context *ctx);
 
 ANCHOR_API bool Anchor_NewSwitch(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info);
 ANCHOR_API bool Anchor_NewOption(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info);

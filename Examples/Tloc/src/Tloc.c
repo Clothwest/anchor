@@ -1,23 +1,38 @@
 #include <Anchor/Anchor.h>
 
+#include "Scanner.h"
+
 int main(int argc, char **argv)
 {
-	Anchor_Context *context = Anchor_Context_Create();
+	Anchor_Context *context = Anchor_CreateContext();
 
-	Anchor_NewSwitch(context, "-h", "--help", "Show help");
-	Anchor_NewSwitch(context, "-v", "--version", "Show version info");
+	Anchor_NewSwitch(context, "-h", "--help", "Show help info");
+	Anchor_NewSwitch(context, "-r", "--recursive", "Recursive");
+	Anchor_NewSwitch(context, "-v", "--verbose", "Show Lines of each file");
 
-	Anchor_Parse(context, argv, argc);
-
-	if (Anchor_IsSet(context, "-h"))
+	if (argc < 2)
 	{
 		Anchor_FPrintDefaultHelp(context, stdout);
+		Anchor_DestroyContext(context);
+		return 0;
 	}
-
-	if (Anchor_IsSet(context, "-v"))
+	
+	if (Anchor_Parse(context, argv, argc) == -1)
 	{
-		printf("v0.1.0\n");
+		printf("Error");
+		Anchor_DestroyContext(context);
+		return 0;
 	}
 
-	Anchor_Context_Destroy(context);
+	const char *path = Anchor_GetPosArgValueAt(context, 0);
+	if (!path)
+	{
+		printf("Missing Path!");
+		Anchor_DestroyContext(context);
+		return 0;
+	}
+
+	Tloc_Scan(path, Anchor_IsSet(context, "-r"), Anchor_IsSet(context, "-v"));
+
+	Anchor_DestroyContext(context);
 }

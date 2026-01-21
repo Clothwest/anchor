@@ -13,7 +13,7 @@ typedef struct Anchor_Context
 
 static bool s_IsValid(Anchor_Context *ctx);
 
-Anchor_Context *Anchor_Context_Create(void)
+Anchor_Context *Anchor_CreateContext(void)
 {
 	Anchor_Context *context = (Anchor_Context *)malloc(sizeof(Anchor_Context));
 	if (!context)
@@ -36,7 +36,7 @@ Anchor_Context *Anchor_Context_Create(void)
 	return context;
 }
 
-void Anchor_Context_Destroy(Anchor_Context *ctx)
+void Anchor_DestroyContext(Anchor_Context *ctx)
 {
 	if (!ctx)
 		return;
