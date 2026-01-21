@@ -10,10 +10,6 @@ It aims to provide a robust, context-driven foundation for building complex comm
 * **C++ Compatible**: Full **C++** compatibility.
 * **Context-Driven**: All parsing state is encapsulated in a context object, avoiding global state.
 
-## Installation
-
-### Integration via Premake
-
 ## Integration
 
 Link `Anchor` as a static library and add `include/` to **both** your and Anchor's include path.
