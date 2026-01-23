@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-static Anchor_Log_Level s_LogLevel = Anchor_Log_Level_Off;
+static Anchor_LogLevel s_LogLevel = Anchor_LogLevel_Off;
 
 static const char *s_Colors[] = {
 	"\x1b[90m", // TRACE
@@ -17,17 +17,17 @@ static const char *s_DefaultColor = "\x1b[0m";
 
 static const char *s_ExtractFileName(const char *filePath);
 
-void Anchor_Log_Init()
+void Anchor_InitLog()
 {
-	Anchor_Log_SetLevel(Anchor_Log_Level_Trace);
+	Anchor_SetLogLevel(Anchor_LogLevel_Trace);
 }
 
-void Anchor_Log_SetLevel(Anchor_Log_Level level)
+void Anchor_SetLogLevel(Anchor_LogLevel level)
 {
 	s_LogLevel = level;
 }
 
-void Anchor_Log(Anchor_Log_Level level, const char *filePath, int line, ...)
+void Anchor_Log(Anchor_LogLevel level, const char *filePath, int line, ...)
 {
 	if (level < s_LogLevel)
 		return;
