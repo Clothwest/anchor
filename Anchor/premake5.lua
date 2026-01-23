@@ -13,5 +13,6 @@ project "Anchor"
 
 	includedirs
 	{
-		"include"
+		"include",
+		"src"
 	}

@@ -1,5 +1,7 @@
 #pragma once
 
+typedef struct Anchor_Context Anchor_Context;
+
 typedef enum Anchor_EntryKind
 {
 	Anchor_EntryKind_None = 0,

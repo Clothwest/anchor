@@ -7,11 +7,7 @@
 #ifndef __cplusplus
 #include <stdbool.h>
 #endif
-
 #include <stddef.h>
-#include <stdio.h>
-
-typedef struct Anchor_Context Anchor_Context;
 
 ANCHOR_API Anchor_Context *Anchor_CreateContext(void);
 ANCHOR_API void Anchor_DestroyContext(Anchor_Context *ctx);
@@ -31,4 +27,4 @@ ANCHOR_API const char *Anchor_GetOptionValue(Anchor_Context *ctx, const char *fl
 ANCHOR_API size_t Anchor_GetPosArgCount(Anchor_Context *ctx);
 ANCHOR_API const char *Anchor_GetPosArgValueAt(Anchor_Context *ctx, size_t index);
 
-ANCHOR_API void Anchor_FPrintDefaultHelp(Anchor_Context *ctx, FILE *stream);
+ANCHOR_API void Anchor_PrintDefaultHelp(Anchor_Context *ctx);
