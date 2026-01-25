@@ -3,7 +3,7 @@ workspace "Anchor"
 	staticruntime "On"
 	systemversion "latest"
 	
-	startproject "CppTest"
+	startproject "CSandbox"
 
 	configurations
 	{
@@ -37,4 +37,5 @@ include "Anchor"
 group "Examples"
 	include "Examples/Tloc"
 	include "Examples/CppTest"
+	include "Examples/CSandbox"
 group ""

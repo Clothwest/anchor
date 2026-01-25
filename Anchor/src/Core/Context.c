@@ -5,6 +5,10 @@
 
 #include <stdlib.h>
 
+static bool s_FlagIsValid(const char *sFlag, const char *lFlag);
+
+static bool s_ENewEntry(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info, Anchor_EntryKind kind);
+
 Anchor_Context *Anchor_CreateContext(void)
 {
 	ANCHOR_INIT_LOG();
@@ -28,6 +32,9 @@ Anchor_Context *Anchor_CreateContext(void)
 		return NULL;
 	}
 
+	Anchor_Context_ResetError(context);
+	context->ErrorCallback = NULL;
+
 	return context;
 }
 
@@ -49,7 +56,9 @@ bool Anchor_NewSwitch(Anchor_Context *ctx, const char *sFlag, const char *lFlag,
 	if (!Anchor_Context_IsValid(ctx))
 		return false;
 
-	return Anchor_EntryContainer_Add(ctx->EntryContainer, sFlag, lFlag, info, Anchor_EntryKind_Switch);
+	Anchor_Context_ResetError(ctx);
+
+	return s_ENewEntry(ctx, sFlag, lFlag, info, Anchor_EntryKind_Switch);
 }
 
 bool Anchor_NewOption(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info)
@@ -57,7 +66,9 @@ bool Anchor_NewOption(Anchor_Context *ctx, const char *sFlag, const char *lFlag,
 	if (!Anchor_Context_IsValid(ctx))
 		return false;
 
-	return Anchor_EntryContainer_Add(ctx->EntryContainer, sFlag, lFlag, info, Anchor_EntryKind_Option);
+	Anchor_Context_ResetError(ctx);
+
+	return s_ENewEntry(ctx, sFlag, lFlag, info, Anchor_EntryKind_Option);
 }
 
 size_t Anchor_GetEntryViewCount(Anchor_Context *ctx)
@@ -129,4 +140,52 @@ const char *Anchor_GetPosArgValueAt(Anchor_Context *ctx, size_t index)
 bool Anchor_Context_IsValid(Anchor_Context *ctx)
 {
 	return ctx && ctx->EntryContainer && ctx->PosArgContainer;
+}
+
+void Anchor_Context_ResetError(Anchor_Context *ctx)
+{
+	ctx->Error.Status = Anchor_Status_Success;
+	ctx->Error.ArgIndex = NON_INDEX;
+	ctx->Error.Token = NULL;
+}
+
+Anchor_Status Anchor_Context_SetError(Anchor_Context *ctx, Anchor_Status status, int argIndex, const char *token)
+{
+	ctx->Error.Status = status;
+	ctx->Error.ArgIndex = argIndex;
+	ctx->Error.Token = token;
+
+	if (ctx->ErrorCallback)
+	{
+		ctx->ErrorCallback(ctx);
+	}
+
+	return status;
+}
+
+bool s_FlagIsValid(const char *sFlag, const char *lFlag)
+{
+	return sFlag || lFlag;
+}
+
+bool s_ENewEntry(Anchor_Context *ctx, const char *sFlag, const char *lFlag, const char *info, Anchor_EntryKind kind)
+{
+	if (!s_FlagIsValid(sFlag, lFlag))
+	{
+		Anchor_Context_SetError(ctx, Anchor_Status_InvalidFlag, NON_INDEX, NULL);
+		return false;
+	}
+
+	bool success = Anchor_EntryContainer_Add(ctx->EntryContainer, sFlag, lFlag, info, kind);
+	switch (Anchor_EntryContainer_GetStatus(ctx->EntryContainer))
+	{
+		case Anchor_EntryContainer_Status_DuplicateFlag:
+			Anchor_Context_SetError(ctx, Anchor_Status_DuplicateFlag, NON_INDEX, NULL);
+			break;
+		case Anchor_EntryContainer_Status_OutOfMemory:
+			Anchor_Context_SetError(ctx, Anchor_Status_OutOfMemory, NON_INDEX, NULL);
+			break;
+	}
+
+	return success;
 }
