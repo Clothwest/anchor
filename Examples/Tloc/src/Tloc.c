@@ -2,6 +2,8 @@
 
 #include "Scanner.h"
 
+#include <stdio.h>
+
 int main(int argc, char **argv)
 {
 	Anchor_Context *context = Anchor_CreateContext();
@@ -12,7 +14,7 @@ int main(int argc, char **argv)
 
 	if (argc < 2)
 	{
-		Anchor_FPrintDefaultHelp(context, stdout);
+		Anchor_PrintDefaultHelp(context);
 		Anchor_DestroyContext(context);
 		return 0;
 	}
@@ -24,12 +26,20 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	const char *path = Anchor_GetPosArgValueAt(context, 0);
-	if (!path)
+	if (Anchor_IsSet(context, "-h"))
+		Anchor_PrintDefaultHelp(context);
+
+	size_t count = Anchor_GetPosArgCount(context);
+	const char *path = NULL;
+	if (count > 0)
 	{
-		printf("Missing Path!");
-		Anchor_DestroyContext(context);
-		return 0;
+		path = Anchor_GetPosArgValueAt(context, 0);
+		if (!path)
+		{
+			printf("Missing Path!");
+			Anchor_DestroyContext(context);
+			return 0;
+		}
 	}
 
 	Tloc_Scan(path, Anchor_IsSet(context, "-r"), Anchor_IsSet(context, "-v"));

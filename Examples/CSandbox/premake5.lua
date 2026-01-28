@@ -1,18 +1,20 @@
-project "Anchor"
-	kind "StaticLib"
+project "CSandbox"
+	kind "ConsoleApp"
 	language "C"
 	cdialect "C11"
 
 	files
 	{
-		"include/**.h",
-
 		"src/**.h",
 		"src/**.c"
 	}
 
 	includedirs
 	{
-		"include",
-		"src"
+		IncludeDirs["Anchor"]
+	}
+
+	links
+	{
+		"Anchor"
 	}

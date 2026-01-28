@@ -17,12 +17,17 @@ typedef struct Anchor_EntryContainer
 {
 	Anchor_Entry *Data;
 
-	size_t Size;
+	size_t Count;
 	size_t Capacity;
+
+	Anchor_EntryContainer_Status Status;
 } Anchor_EntryContainer;
 
-static int s_GrowIfNeeded(Anchor_EntryContainer *container);
+static int s_EGrowIfNeeded(Anchor_EntryContainer *container);
 static Anchor_Entry *s_FindEntry(Anchor_EntryContainer *container, const char *flag);
+
+static void s_ResetStatus(Anchor_EntryContainer *container);
+static Anchor_EntryContainer_Status s_SetStatus(Anchor_EntryContainer *container, Anchor_EntryContainer_Status status);
 
 Anchor_EntryContainer *Anchor_EntryContainer_Create(void)
 {
@@ -37,8 +42,10 @@ Anchor_EntryContainer *Anchor_EntryContainer_Create(void)
 		return NULL;
 	}
 
-	container->Size = 0;
+	container->Count = 0;
 	container->Capacity = INIT_CAP;
+
+	s_ResetStatus(container);
 
 	return container;
 }
@@ -51,11 +58,19 @@ void Anchor_EntryContainer_Destroy(Anchor_EntryContainer *container)
 
 bool Anchor_EntryContainer_Add(Anchor_EntryContainer *container, const char *sFlag, const char *lFlag, const char *info, Anchor_EntryKind kind)
 {
-	size_t grownCapacity = s_GrowIfNeeded(container);
+	s_ResetStatus(container);
+
+	if (sFlag && s_FindEntry(container, sFlag) || lFlag && s_FindEntry(container, lFlag))
+	{
+		s_SetStatus(container, Anchor_EntryContainer_Status_DuplicateFlag);
+		return false;
+	}
+
+	int grownCapacity = s_EGrowIfNeeded(container);
 	if (grownCapacity == -1)
 		return false;
 
-	Anchor_Entry *newEntry = container->Data + container->Size++;
+	Anchor_Entry *newEntry = container->Data + container->Count++;
 
 	newEntry->View.ShortFlag = sFlag;
 	newEntry->View.LongFlag = lFlag;
@@ -76,7 +91,7 @@ bool Anchor_EntryContainer_Has(Anchor_EntryContainer *container, const char *fla
 
 size_t Anchor_EntryContainer_GetViewCount(Anchor_EntryContainer *container)
 {
-	return container->Size;
+	return container->Count;
 }
 
 const Anchor_EntryView *Anchor_EntryContainer_GetViewAt(Anchor_EntryContainer *container, size_t index)
@@ -123,17 +138,25 @@ const char *Anchor_EntryContainer_GetValue(Anchor_EntryContainer *container, con
 	return entry->RawValue;
 }
 
-int s_GrowIfNeeded(Anchor_EntryContainer *container)
+Anchor_EntryContainer_Status Anchor_EntryContainer_GetStatus(Anchor_EntryContainer *container)
+{
+	return container->Status;
+}
+
+int s_EGrowIfNeeded(Anchor_EntryContainer *container)
 {
 	size_t oldCapacity = container->Capacity;
 
-	if (container->Size < container->Capacity)
+	if (container->Count < container->Capacity)
 		return 0;
 
 	size_t newCapacity = 2 * container->Capacity;
 	Anchor_Entry *newData = (Anchor_Entry *)realloc(container->Data, newCapacity * sizeof(Anchor_Entry));
 	if (!newData)
+	{
+		s_SetStatus(container, Anchor_EntryContainer_Status_OutOfMemory);
 		return -1;
+	}
 
 	container->Data = newData;
 	container->Capacity = newCapacity;
@@ -142,7 +165,7 @@ int s_GrowIfNeeded(Anchor_EntryContainer *container)
 
 Anchor_Entry *s_FindEntry(Anchor_EntryContainer *container, const char *flag)
 {
-	for (int i = 0; i < container->Size; i++)
+	for (int i = 0; i < container->Count; i++)
 	{
 		Anchor_Entry *entry = container->Data + i;
 		Anchor_EntryView *view = &entry->View;
@@ -154,4 +177,14 @@ Anchor_Entry *s_FindEntry(Anchor_EntryContainer *container, const char *flag)
 	}
 
 	return NULL;
+}
+
+void s_ResetStatus(Anchor_EntryContainer *container)
+{
+	container->Status = Anchor_EntryContainer_Status_Success;
+}
+
+Anchor_EntryContainer_Status s_SetStatus(Anchor_EntryContainer *container, Anchor_EntryContainer_Status status)
+{
+	return container->Status = status;
 }

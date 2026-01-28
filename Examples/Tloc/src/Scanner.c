@@ -9,6 +9,9 @@ static long s_CountLines(const char *filePath);
 
 void Tloc_Scan(const char *path, bool recursive, bool verbose)
 {
+	if (!path)
+		return;
+
 	char *searchPath = (char *)malloc(MAX_PATH);
 	if (!searchPath)
 		return;
