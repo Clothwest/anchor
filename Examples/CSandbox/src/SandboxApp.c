@@ -16,19 +16,15 @@ int main(int argc, char **argv)
 	Anchor_NewSwitch(app, "-v", "--version", "Show version info");
 	Anchor_NewOption(app, "-o", "--output", "Set output file name");
 
-	Anchor_NewSwitch(app, NULL, NULL, NULL);
-	if (Anchor_GetErrorStatus(app) != Anchor_Status_Success)
-	{
-		char buffer[64];
-		Anchor_GetErrorMsg(app, buffer, 64);
-		printf(buffer);
-	}
+	int errorCount = Anchor_Parse(app, argv, argc);
 
+	Anchor_DestroyContext(app);
 }
 
 void s_ErrorCallback(Anchor_Context *ctx)
 {
-	/*char buffer[64];
+	char buffer[64];
 	Anchor_GetErrorMsg(ctx, buffer, 64);
-	printf(buffer);*/
+	printf(buffer);
+	printf("\n");
 }

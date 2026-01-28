@@ -32,8 +32,6 @@ typedef enum Anchor_Status
 
 	Anchor_Status_OutOfMemory,
 
-	Anchor_Status_InvalidContext,
-
 	Anchor_Status_InvalidFlag,
 	Anchor_Status_DuplicateFlag,
 
